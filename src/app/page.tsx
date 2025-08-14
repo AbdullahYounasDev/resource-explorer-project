@@ -1,5 +1,5 @@
 "use client";
-
+import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -12,7 +12,7 @@ import LoadingState from "@/components/LoadingState";
 import SearchAndFilter from "@/components/SearchAndFilter";
 import CharacterGrid from "@/components/CharacterGrid";
 import Pagination from "@/components/Pagination";
-import { useTheme } from "@/app/providers"; 
+import { useTheme } from "@/app/providers";
 
 interface Character {
   id: number;
@@ -31,8 +31,8 @@ interface CharacterResponse {
   results: Character[];
 }
 
-export default function HomePage() {
-  const { theme } = useTheme(); // get current theme
+function HomePageContent() {
+  const { theme } = useTheme();
   const searchParams = useSearchParams();
   const router = useRouter();
   const { favorites, toggleFavorite } = useFavorites();
@@ -45,22 +45,20 @@ export default function HomePage() {
   const sortOrder = searchParams.get("sort") || "asc";
 
   const { data, isLoading, isError, refetch } = useQuery<CharacterResponse>({
-  queryKey: ["characters", page, debouncedSearch, statusFilter, sortOrder],
-  queryFn: async ({ signal }) => {
-    // Pass signal to axios for cancellation
-    const res = await api.get<CharacterResponse>("/character", {
-      params: {
-        page,
-        name: debouncedSearch || undefined,
-        status: statusFilter || undefined,
-      },
-      signal, 
-    });
-    return res.data;
-  },
-  placeholderData: keepPreviousData,
-});
-
+    queryKey: ["characters", page, debouncedSearch, statusFilter, sortOrder],
+    queryFn: async ({ signal }) => {
+      const res = await api.get<CharacterResponse>("/character", {
+        params: {
+          page,
+          name: debouncedSearch || undefined,
+          status: statusFilter || undefined,
+        },
+        signal,
+      });
+      return res.data;
+    },
+    placeholderData: keepPreviousData,
+  });
 
   const updateParams = (params: Record<string, string | number | undefined>) => {
     const newParams = new URLSearchParams(searchParams.toString());
@@ -75,10 +73,9 @@ export default function HomePage() {
   if (isError) return <ErrorState message="Failed to load characters." onRetry={refetch} />;
   if (!data?.results?.length) return <EmptyState message="No characters found." />;
 
-  // ------------------ set dynamic class based on theme ------------------
   const containerClass = theme === "dark"
-    ? "p-4 space-y-4 font-comic min-h-screen relative overflow-hidden bg-gray-900 "
-    : "p-4 space-y-4 font-comic min-h-screen relative overflow-hidden bg-[#FFD580] bg-[url('https://assets.codepen.io/13471/comic-bg-dots.png')] text-black";
+    ? "p-4 space-y-4 font-comic min-h-screen relative overflow-hidden bg-gray-900"
+    : "p-4 space-y-4 font-comic min-h-screen relative overflow-hidden bg-[#FFD580] text-black";
 
   return (
     <div className={containerClass}>
@@ -109,5 +106,22 @@ export default function HomePage() {
         onPageChange={(newPage: any) => updateParams({ page: newPage })}
       />
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={
+      <div className="p-4 space-y-4 font-comic min-h-screen flex items-center justify-center">
+        <div className="border-4 border-black bg-white p-8 rounded-xl shadow-comic-lg text-center">
+          <h2 className="text-2xl font-bold mb-2">LOADING COMIC UNIVERSE...</h2>
+          <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden border-2 border-black">
+            <div className="h-full bg-blue-500 animate-pulse" style={{ width: "70%" }}></div>
+          </div>
+        </div>
+      </div>
+    }>
+      <HomePageContent />
+    </Suspense>
   );
 }
