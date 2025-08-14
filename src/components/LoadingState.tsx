@@ -1,6 +1,6 @@
 "use client";
 import { useTheme } from "@/app/providers";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 
 export default function LoadingState() {
   const { theme } = useTheme();
@@ -9,7 +9,7 @@ export default function LoadingState() {
   const isDark = theme === "dark";
 
   // Animation variants
-  const cardVariants = {
+  const cardVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: (i: number) => ({
       opacity: 1,
