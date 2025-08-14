@@ -22,11 +22,17 @@ export default function CharacterDetail() {
   if (isLoading) return <LoadingState />;
   if (isError) return <ErrorState onRetry={() => window.location.reload()} />;
 
-  const statusColor = {
+  type Status = "alive" | "dead" | "unknown";
+
+  const statusColorMap: Record<Status, string> = {
     alive: "bg-green-500",
     dead: "bg-red-500",
     unknown: "bg-yellow-500",
-  }[data.status.toLowerCase()];
+  };
+
+  const statusKey = data.status.toLowerCase() as Status;
+  const statusColor = statusColorMap[statusKey];
+
 
   // Theme-based classes
   const containerClass = theme === "dark"
@@ -134,13 +140,12 @@ export default function CharacterDetail() {
               {/* Favorite Button */}
               <motion.button
                 onClick={() => toggleFavorite(data.id)}
-                className={`w-full py-3 px-6 rounded-lg border-4 border-black font-comic font-bold text-xl flex items-center justify-center gap-2 ${
-                  favorites.includes(data.id)
+                className={`w-full py-3 px-6 rounded-lg border-4 border-black font-comic font-bold text-xl flex items-center justify-center gap-2 ${favorites.includes(data.id)
                     ? "bg-red-500 text-white"
                     : theme === "dark"
-                    ? "bg-gray-800 text-white"
-                    : "bg-white text-black"
-                } shadow-comic-lg hover:shadow-comic-xl transition-all`}
+                      ? "bg-gray-800 text-white"
+                      : "bg-white text-black"
+                  } shadow-comic-lg hover:shadow-comic-xl transition-all`}
                 whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -160,18 +165,16 @@ export default function CharacterDetail() {
                 {data.episode.slice(0, 8).map((episode: string) => (
                   <div
                     key={episode}
-                    className={`border-2 rounded-lg p-2 text-center font-comic font-bold ${
-                      theme === "dark" ? "bg-gray-700 border-white text-white" : "bg-gray-100 border-black"
-                    }`}
+                    className={`border-2 rounded-lg p-2 text-center font-comic font-bold ${theme === "dark" ? "bg-gray-700 border-white text-white" : "bg-gray-100 border-black"
+                      }`}
                   >
                     {episode.split("/").pop()}
                   </div>
                 ))}
                 {data.episode.length > 8 && (
                   <div
-                    className={`border-2 rounded-lg p-2 text-center font-comic font-bold ${
-                      theme === "dark" ? "bg-gray-700 border-white text-white" : "bg-gray-200 border-black"
-                    }`}
+                    className={`border-2 rounded-lg p-2 text-center font-comic font-bold ${theme === "dark" ? "bg-gray-700 border-white text-white" : "bg-gray-200 border-black"
+                      }`}
                   >
                     +{data.episode.length - 8} more
                   </div>
