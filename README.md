@@ -36,7 +36,7 @@ http://localhost:3000
 
 The app is fully client-side, using Next.js App Router. Favorites are persisted in local storage.
 
-Architecture & Notes
+##Architecture & Notes
 File Structure
 ```bash
 /app
